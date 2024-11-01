@@ -128,9 +128,11 @@
     </div>
 
     <script type="module">
-        import { initializeApp } from "firebase/app";
-        import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
             authDomain: "mamcet-ai.firebaseapp.com",
@@ -141,6 +143,7 @@
             measurementId: "G-VQ12MPKH77"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -197,11 +200,11 @@
         });
 
         async function showStudentDetails(id) {
-            const docRef = collection(db, 'students').doc(id);
-            const doc = await getDoc(docRef);
+            const docRef = doc(db, 'students', id);
+            const docSnapshot = await getDoc(docRef);
 
-            if (doc.exists()) {
-                const data = doc.data();
+            if (docSnapshot.exists()) {
+                const data = docSnapshot.data();
                 const detailsDiv = document.getElementById('studentDetails');
                 detailsDiv.innerHTML = `
                     <h3>Student Details</h3>
@@ -217,6 +220,7 @@
             }
         }
 
+        // Load the student data when the page loads
         loadStudents();
     </script>
 </body>
