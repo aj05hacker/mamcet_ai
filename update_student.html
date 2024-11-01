@@ -106,15 +106,33 @@
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
             </select>
-
-            <label for="department">Department:</label>
-            <input type="text" id="department" required autocomplete="off">
             
+            <label for="degree">Degree:</label>
+            <select id="degree" required>
+                <option value="">Select Degree</option>
+                <option value="B.E">B.E</option>
+                <option value="B.Tech">B.Tech</option>
+            </select>
+
             <label for="course">Course:</label>
-            <input type="text" id="course" required autocomplete="off">
+            <select id="course" required>
+                <option value="">Select Course</option>
+                <option value="IT">Information Technology</option>
+                <option value="CSE">Computer Science and Engineering</option>
+                <option value="EEE">Electrical and Electronics Engineering</option>
+                <option value="ECE">Electronics and Communication Engineering</option>
+                <option value="MECH">Mechanical Engineering</option>
+                <option value="AIDS">Artificial Intelligence & Data Science</option>
+            </select>
 
             <label for="year">Year:</label>
-            <input type="text" id="year" required autocomplete="off">
+            <select id="year" required>
+                <option value="">Select Year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+            </select>
 
             <label for="gender">Gender:</label>
             <select id="gender" required>
@@ -150,7 +168,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -174,7 +192,7 @@
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
             const bloodGroup = document.getElementById('bloodGroup').value;
-            const department = document.getElementById('department').value;
+            const degree = document.getElementById('degree').value;
             const course = document.getElementById('course').value;
             const year = document.getElementById('year').value;
             const gender = document.getElementById('gender').value;
@@ -182,11 +200,11 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
 
             const studentData = {
-                registrationNumber, // Add registration number to the data
+                registrationNumber,
                 name,
                 dob,
                 bloodGroup,
-                department,
+                degree,
                 course,
                 year,
                 gender,
@@ -195,8 +213,7 @@
             };
 
             try {
-                // Use registration number as the document name
-                await setDoc(doc(db, 'students', registrationNumber), studentData);
+                await addDoc(collection(db, 'students'), studentData);
                 alert('Student details updated successfully!');
                 loadStudents();
                 document.getElementById('updateStudentForm').reset();
@@ -230,12 +247,10 @@
             }
         });
 
-        async function showStudentDetails(id) {
-            const docRef = doc(db, 'students', id);
-            const docSnapshot = await getDoc(docRef);
-
-            if (docSnapshot.exists()) {
-                const data = docSnapshot.data();
+                async function showStudentDetails(studentId) {
+            const studentDoc = await getDoc(doc(db, 'students', studentId));
+            if (studentDoc.exists()) {
+                const data = studentDoc.data();
                 const detailsDiv = document.getElementById('studentDetails');
                 detailsDiv.innerHTML = `
                     <h3>Student Details</h3>
@@ -243,7 +258,7 @@
                     <p><strong>Name:</strong> ${data.name}</p>
                     <p><strong>Date of Birth:</strong> ${data.dob}</p>
                     <p><strong>Blood Group:</strong> ${data.bloodGroup}</p>
-                    <p><strong>Department:</strong> ${data.department}</p>
+                    <p><strong>Degree:</strong> ${data.degree}</p>
                     <p><strong>Course:</strong> ${data.course}</p>
                     <p><strong>Year:</strong> ${data.year}</p>
                     <p><strong>Gender:</strong> ${data.gender}</p>
@@ -252,11 +267,13 @@
                 `;
                 detailsDiv.style.display = 'block';
             } else {
-                console.log('No such document!');
+                alert('No such student found!');
             }
         }
 
-        loadStudents(); // Load students on page load
+        // Load students on initial page load
+        loadStudents();
     </script>
 </body>
 </html>
+
