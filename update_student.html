@@ -86,7 +86,7 @@
     <div class="container">
         <form id="updateStudentForm">
             <label for="registrationNumber">Registration Number:</label>
-            <input type="text" id="registrationNumber" required autocomplete="off">
+            <input type="number" id="registrationNumber" required autocomplete="off">
             
             <label for="name">Name:</label>
             <input type="text" id="name" required autocomplete="off">
@@ -106,34 +106,34 @@
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
             </select>
-            
+
             <label for="degree">Degree:</label>
             <select id="degree" required>
                 <option value="">Select Degree</option>
                 <option value="B.E">B.E</option>
                 <option value="B.Tech">B.Tech</option>
             </select>
-
+            
             <label for="course">Course:</label>
             <select id="course" required>
                 <option value="">Select Course</option>
                 <option value="IT">Information Technology</option>
-                <option value="CSE">Computer Science and Engineering</option>
+                <option value="CSE">Computer Science Engineering</option>
                 <option value="EEE">Electrical and Electronics Engineering</option>
                 <option value="ECE">Electronics and Communication Engineering</option>
                 <option value="MECH">Mechanical Engineering</option>
-                <option value="AIDS">Artificial Intelligence & Data Science</option>
+                <option value="AI&DS">Artificial Intelligence & Data Science</option>
             </select>
 
             <label for="year">Year:</label>
             <select id="year" required>
                 <option value="">Select Year</option>
-                <option value="1st Year">1st Year</option>
-                <option value="2nd Year">2nd Year</option>
-                <option value="3rd Year">3rd Year</option>
-                <option value="4th Year">4th Year</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
             </select>
-
+            
             <label for="gender">Gender:</label>
             <select id="gender" required>
                 <option value="">Select Gender</option>
@@ -141,15 +141,24 @@
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
             </select>
-
+            
             <label for="address">Address:</label>
             <input type="text" id="address" required autocomplete="off">
-
+            
             <label for="phoneNumber">Phone Number:</label>
             <input type="text" id="phoneNumber" required autocomplete="off">
-
+            
             <button type="submit">Update Student</button>
         </form>
+
+        <h2>Filter by Year:</h2>
+        <select id="yearFilter">
+            <option value="">All Years</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+        </select>
 
         <h2>Registered Students</h2>
         <table class="student-table" id="studentTable">
@@ -166,11 +175,9 @@
     </div>
 
     <script type="module">
-        // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, query, where } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
             authDomain: "mamcet-ai.firebaseapp.com",
@@ -181,14 +188,13 @@
             measurementId: "G-VQ12MPKH77"
         };
 
-        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
         document.getElementById('updateStudentForm').addEventListener('submit', async (event) => {
             event.preventDefault();
 
-            const registrationNumber = document.getElementById('registrationNumber').value;
+            const registrationNumber = Number(document.getElementById('registrationNumber').value);
             const name = document.getElementById('name').value;
             const dob = document.getElementById('dob').value;
             const bloodGroup = document.getElementById('bloodGroup').value;
@@ -223,52 +229,55 @@
             }
         });
 
+        document.getElementById('yearFilter').addEventListener('change', loadStudents);
+
         async function loadStudents() {
             const studentTableBody = document.getElementById('studentTableBody');
             studentTableBody.innerHTML = ''; // Clear existing data
-            const querySnapshot = await getDocs(collection(db, 'students'));
+            const yearFilterValue = document.getElementById('yearFilter').value;
+            let studentsQuery = collection(db, 'students');
 
-            querySnapshot.forEach((doc) => {
-                const data = doc.data();
+            if (yearFilterValue) {
+                studentsQuery = query(studentsQuery, where('year                ', '==', yearFilterValue);
+            }
+
+            const studentDocs = await getDocs(studentsQuery);
+            const studentsArray = [];
+            studentDocs.forEach((doc) => {
+                const student = { id: doc.id, ...doc.data() };
+                studentsArray.push(student);
+            });
+
+            // Sort students by registration number
+            studentsArray.sort((a, b) => a.registrationNumber - b.registrationNumber);
+
+            // Populate the table with sorted data
+            studentsArray.forEach(student => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
-                    <td><a href="#" class="registration-link" data-id="${doc.id}">${data.registrationNumber}</a></td>
-                    <td>${data.name}</td>
+                    <td>${student.registrationNumber}</td>
+                    <td>${student.name}</td>
                 `;
+                row.addEventListener('click', () => showStudentDetails(student));
                 studentTableBody.appendChild(row);
             });
         }
 
-        document.getElementById('studentTableBody').addEventListener('click', (event) => {
-            if (event.target.classList.contains('registration-link')) {
-                event.preventDefault();
-                const studentId = event.target.getAttribute('data-id');
-                showStudentDetails(studentId);
-            }
-        });
-
-                async function showStudentDetails(studentId) {
-            const studentDoc = await getDoc(doc(db, 'students', studentId));
-            if (studentDoc.exists()) {
-                const data = studentDoc.data();
-                const detailsDiv = document.getElementById('studentDetails');
-                detailsDiv.innerHTML = `
-                    <h3>Student Details</h3>
-                    <p><strong>Registration Number:</strong> ${data.registrationNumber}</p>
-                    <p><strong>Name:</strong> ${data.name}</p>
-                    <p><strong>Date of Birth:</strong> ${data.dob}</p>
-                    <p><strong>Blood Group:</strong> ${data.bloodGroup}</p>
-                    <p><strong>Degree:</strong> ${data.degree}</p>
-                    <p><strong>Course:</strong> ${data.course}</p>
-                    <p><strong>Year:</strong> ${data.year}</p>
-                    <p><strong>Gender:</strong> ${data.gender}</p>
-                    <p><strong>Address:</strong> ${data.address}</p>
-                    <p><strong>Phone Number:</strong> ${data.phoneNumber}</p>
-                `;
-                detailsDiv.style.display = 'block';
-            } else {
-                alert('No such student found!');
-            }
+        function showStudentDetails(student) {
+            const studentDetailsDiv = document.getElementById('studentDetails');
+            studentDetailsDiv.innerHTML = `
+                <h3>Details for ${student.name}</h3>
+                <p><strong>Registration Number:</strong> ${student.registrationNumber}</p>
+                <p><strong>Date of Birth:</strong> ${student.dob}</p>
+                <p><strong>Blood Group:</strong> ${student.bloodGroup}</p>
+                <p><strong>Degree:</strong> ${student.degree}</p>
+                <p><strong>Course:</strong> ${student.course}</p>
+                <p><strong>Year:</strong> ${student.year}</p>
+                <p><strong>Gender:</strong> ${student.gender}</p>
+                <p><strong>Address:</strong> ${student.address}</p>
+                <p><strong>Phone Number:</strong> ${student.phoneNumber}</p>
+            `;
+            studentDetailsDiv.style.display = 'block';
         }
 
         // Load students on initial page load
@@ -276,4 +285,3 @@
     </script>
 </body>
 </html>
-
