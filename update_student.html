@@ -4,72 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M.A.M CET - Students Update Page Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <div class="container">
-        <h1>M.A.M CET - Students Update Page Admin Dashboard</h1>
-        <form id="student-form">
-            <label for="year">Select Year:</label>
-            <select id="year" required>
-                <option value="" disabled selected>Select Year</option>
-                <option value="1st year">1st Year</option>
-                <option value="2nd year">2nd Year</option>
-                <option value="3rd year">3rd Year</option>
-                <option value="4th year">4th Year</option>
-            </select>
-
-            <label for="registration-number">Registration Number:</label>
-            <input type="text" id="registration-number" required>
-
-            <label for="name">Name:</label>
-            <input type="text" id="name" required>
-
-            <label for="dob">Date of Birth:</label>
-            <input type="date" id="dob" required>
-
-            <label for="blood-group">Blood Group:</label>
-            <input type="text" id="blood-group" required>
-
-            <label for="department">Department:</label>
-            <input type="text" id="department" required>
-
-            <label for="course">Course:</label>
-            <input type="text" id="course" required>
-
-            <label for="gender">Gender:</label>
-            <select id="gender" required>
-                <option value="" disabled selected>Select Gender</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
-            </select>
-
-            <label for="address">Address:</label>
-            <textarea id="address" required></textarea>
-
-            <label for="number">Contact Number:</label>
-            <input type="text" id="number" required>
-
-            <button type="submit">Update Student</button>
-        </form>
-
-        <h2>All Students</h2>
-        <table id="students-table">
-            <thead>
-                <tr>
-                    <th>Registration Number</th>
-                </tr>
-            </thead>
-            <tbody id="students-list">
-                <!-- Student registration numbers will be populated here -->
-            </tbody>
-        </table>
-    </div>
-
+    <link rel="stylesheet" href="styles.css"> <!-- Ensure you have this file in the same directory -->
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.12.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.12.0/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
+        import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
@@ -84,148 +22,163 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById('student-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
+        async function updateStudent(event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            const studentDetails = Object.fromEntries(formData.entries());
+            const year = studentDetails.year; // Get the year from the form
 
-            const year = document.getElementById('year').value;
-            const registrationNumber = document.getElementById('registration-number').value;
-            const name = document.getElementById('name').value;
-            const dob = document.getElementById('dob').value;
-            const bloodGroup = document.getElementById('blood-group').value;
-            const department = document.getElementById('department').value;
-            const course = document.getElementById('course').value;
-            const gender = document.getElementById('gender').value;
-            const address = document.getElementById('address').value;
-            const number = document.getElementById('number').value;
-
-            const studentData = {
-                name,
-                dob,
-                bloodGroup,
-                department,
-                course,
-                gender,
-                address,
-                number
-            };
-
-            await setDoc(doc(db, `students/${year}`, registrationNumber), studentData);
-            console.log('Student details updated:', studentData);
-
-            // Refresh the student list
-            fetchStudents();
-            e.target.reset();
-        });
+            // Create a document with registration number as the document ID
+            const studentDocRef = doc(db, `students/${year}/${studentDetails.registrationNumber}`);
+            
+            try {
+                await setDoc(studentDocRef, studentDetails);
+                alert("Student details updated successfully!");
+                event.target.reset();
+                fetchStudents(); // Refresh the displayed student data
+            } catch (error) {
+                console.error("Error updating student details:", error);
+                alert("Failed to update student details. Please try again.");
+            }
+        }
 
         async function fetchStudents() {
-            const year = document.getElementById('year').value;
-            const studentsRef = collection(db, `students/${year}`);
-            const snapshot = await getDocs(studentsRef);
-            const studentsList = document.getElementById('students-list');
-            studentsList.innerHTML = '';
+            const year = document.getElementById('yearSelect').value;
+            const studentsCollectionRef = collection(db, `students/${year}`);
+            const snapshot = await getDocs(studentsCollectionRef);
+            const tableBody = document.getElementById('studentTableBody');
+            tableBody.innerHTML = ""; // Clear previous data
 
-            snapshot.forEach((doc) => {
+            snapshot.forEach(doc => {
+                const studentData = doc.data();
                 const row = document.createElement('tr');
-                row.innerHTML = `<td><button onclick="showStudentDetails('${doc.id}')">${doc.id}</button></td>`;
-                studentsList.appendChild(row);
+                row.innerHTML = `<td><button onclick="showDetails('${doc.id}')">${doc.id}</button></td>`;
+                tableBody.appendChild(row);
             });
         }
 
-        window.showStudentDetails = async (regNumber) => {
-            const year = document.getElementById('year').value;
-            const studentRef = doc(db, `students/${year}`, regNumber);
-            const studentDoc = await getDoc(studentRef);
-            if (studentDoc.exists()) {
-                const data = studentDoc.data();
-                alert(JSON.stringify(data, null, 2));
-            } else {
-                alert('No such student!');
-            }
-        };
+        function showDetails(registrationNumber) {
+            const year = document.getElementById('yearSelect').value;
+            const studentDocRef = doc(db, `students/${year}/${registrationNumber}`);
+            getDoc(studentDocRef).then(doc => {
+                if (doc.exists()) {
+                    const details = doc.data();
+                    alert(JSON.stringify(details, null, 2)); // Show student details in an alert
+                } else {
+                    alert("No such student!");
+                }
+            }).catch(error => {
+                console.error("Error fetching student details:", error);
+            });
+        }
 
-        // Fetch students when year is selected
-        document.getElementById('year').addEventListener('change', fetchStudents);
     </script>
+</head>
+<body>
+    <h1>M.A.M CET - Students Update Page Admin Dashboard</h1>
+    <form onsubmit="updateStudent(event)">
+        <label for="registrationNumber">Registration Number:</label>
+        <input type="text" id="registrationNumber" name="registrationNumber" required>
+        
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required>
+        
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" name="dob" required>
+        
+        <label for="bloodGroup">Blood Group:</label>
+        <input type="text" id="bloodGroup" name="bloodGroup" required>
+        
+        <label for="department">Department:</label>
+        <input type="text" id="department" name="department" required>
+        
+        <label for="gender">Gender:</label>
+        <select id="gender" name="gender" required>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select>
+
+        <label for="year">Year:</label>
+        <select id="year" name="year" required>
+            <option value="1st year">1st Year</option>
+            <option value="2nd year">2nd Year</option>
+            <option value="3rd year">3rd Year</option>
+            <option value="4th year">4th Year</option>
+        </select>
+
+        <button type="submit">Update Student</button>
+    </form>
+
+    <h2>All Students in Selected Year</h2>
+    <select id="yearSelect" onchange="fetchStudents()">
+        <option value="1st year">1st Year</option>
+        <option value="2nd year">2nd Year</option>
+        <option value="3rd year">3rd Year</option>
+        <option value="4th year">4th Year</option>
+    </select>
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Registration Number</th>
+            </tr>
+        </thead>
+        <tbody id="studentTableBody">
+            <!-- Student data will be displayed here -->
+        </tbody>
+    </table>
+
     <style>
+        /* Add some styles to make it look professional */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 20px;
         }
-
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        }
-
         h1 {
             text-align: center;
-            color: #333;
         }
-
         form {
-            display: flex;
-            flex-direction: column;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
         }
-
         label {
-            margin-bottom: 5px;
-            font-weight: bold;
+            display: block;
+            margin: 10px 0 5px;
         }
-
-        input, select, textarea {
-            margin-bottom: 15px;
+        input, select, button {
+            width: 100%;
             padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 16px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
-
         button {
-            padding: 10px;
-            background-color: #5cb85c;
+            background-color: #28a745;
             color: white;
             border: none;
-            border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
         }
-
         button:hover {
-            background-color: #4cae4c;
+            background-color: #218838;
         }
-
         table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
+            margin-top: 20px;
         }
-
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 10px;
             text-align: left;
+            border: 1px solid #ccc;
         }
-
         th {
-            background-color: #f2f2f2;
-        }
-
-        button {
-            background: none;
-            border: none;
-            color: #007bff;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-
-        button:hover {
-            text-decoration: none;
+            background-color: #f8f8f8;
         }
     </style>
 </body>
