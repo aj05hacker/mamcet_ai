@@ -4,12 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Student Details</title>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "firebase/app";
-        import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import Firestore functions
-        import { getAnalytics } from "firebase/analytics";
+    <!-- Import Firebase SDK from CDN -->
+    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-analytics.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.19.1/firebase-firestore.js"></script>
 
+    <script>
         // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
@@ -22,9 +22,9 @@
         };
 
         // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const db = getFirestore(app); // Initialize Firestore
+        const app = firebase.initializeApp(firebaseConfig);
+        const analytics = firebase.getAnalytics(app);
+        const db = firebase.getFirestore(app); // Initialize Firestore
 
         async function updateStudent(event) {
             event.preventDefault(); // Prevent the default form submission
@@ -53,11 +53,11 @@
             });
 
             // Reference to the student document using the registration number
-            const studentRef = doc(db, 'students', registrationNumber);
+            const studentRef = firebase.doc(db, 'students', registrationNumber);
 
             try {
                 // Use setDoc to create or update the document
-                await setDoc(studentRef, {
+                await firebase.setDoc(studentRef, {
                     name: name,
                     dob: dob,
                     bloodGroup: bloodGroup,
