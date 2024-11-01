@@ -106,10 +106,10 @@
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
             </select>
-            
+
             <label for="department">Department:</label>
             <input type="text" id="department" required autocomplete="off">
-
+            
             <label for="course">Course:</label>
             <input type="text" id="course" required autocomplete="off">
 
@@ -128,7 +128,7 @@
             <input type="text" id="address" required autocomplete="off">
 
             <label for="phoneNumber">Phone Number:</label>
-            <input type="tel" id="phoneNumber" required autocomplete="off">
+            <input type="text" id="phoneNumber" required autocomplete="off">
 
             <button type="submit">Update Student</button>
         </form>
@@ -150,7 +150,7 @@
     <script type="module">
         // Import the functions you need from the SDKs you need
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
         // Your web app's Firebase configuration
         const firebaseConfig = {
@@ -182,7 +182,7 @@
             const phoneNumber = document.getElementById('phoneNumber').value;
 
             const studentData = {
-                registrationNumber,
+                registrationNumber, // Add registration number to the data
                 name,
                 dob,
                 bloodGroup,
@@ -239,7 +239,7 @@
                 const detailsDiv = document.getElementById('studentDetails');
                 detailsDiv.innerHTML = `
                     <h3>Student Details</h3>
-                    <p><strong>Registration Number:</strong> ${id}</p>
+                    <p><strong>Registration Number:</strong> ${data.registrationNumber}</p>
                     <p><strong>Name:</strong> ${data.name}</p>
                     <p><strong>Date of Birth:</strong> ${data.dob}</p>
                     <p><strong>Blood Group:</strong> ${data.bloodGroup}</p>
@@ -252,11 +252,11 @@
                 `;
                 detailsDiv.style.display = 'block';
             } else {
-                alert('No such student found!');
+                console.log('No such document!');
             }
         }
 
-        loadStudents(); // Load students when the page loads
+        loadStudents(); // Load students on page load
     </script>
 </body>
 </html>
