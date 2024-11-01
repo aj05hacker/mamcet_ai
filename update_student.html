@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="styles.css"> <!-- Ensure you have this file in the same directory -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
+        import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
@@ -22,7 +22,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.fetchStudents = async function() { // Make this function globally accessible
+        window.fetchStudents = async function() {
             const year = document.getElementById('yearSelect').value;
             const studentsCollectionRef = collection(db, `students/${year}`);
             const snapshot = await getDocs(studentsCollectionRef);
@@ -37,22 +37,19 @@
             });
         }
 
-        window.showDetails = function(registrationNumber) {
+        window.showDetails = async function(registrationNumber) {
             const year = document.getElementById('yearSelect').value;
             const studentDocRef = doc(db, `students/${year}/${registrationNumber}`);
-            getDoc(studentDocRef).then(doc => {
-                if (doc.exists()) {
-                    const details = doc.data();
-                    alert(JSON.stringify(details, null, 2)); // Show student details in an alert
-                } else {
-                    alert("No such student!");
-                }
-            }).catch(error => {
-                console.error("Error fetching student details:", error);
-            });
+            const docSnap = await getDoc(studentDocRef);
+            if (docSnap.exists()) {
+                const details = docSnap.data();
+                alert(JSON.stringify(details, null, 2)); // Show student details in an alert
+            } else {
+                alert("No such student!");
+            }
         }
 
-        window.updateStudent = async function(event) { // Make this function globally accessible
+        window.updateStudent = async function(event) {
             event.preventDefault();
             const formData = new FormData(event.target);
             const studentDetails = Object.fromEntries(formData.entries());
