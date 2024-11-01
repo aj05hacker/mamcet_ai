@@ -23,23 +23,21 @@
         const db = getFirestore(app);
 
         window.fetchStudents = async function() {
-            const year = document.getElementById('yearSelect').value;
-            const studentsCollectionRef = collection(db, `students/${year}`);
+            const year = document.getElementById('yearSelect').value; // Get the selected year
+            const studentsCollectionRef = collection(db, `students/${year}`); // Correct reference to year collection
             const snapshot = await getDocs(studentsCollectionRef);
             const tableBody = document.getElementById('studentTableBody');
             tableBody.innerHTML = ""; // Clear previous data
 
             snapshot.forEach(doc => {
-                const studentData = doc.data();
                 const row = document.createElement('tr');
-                row.innerHTML = `<td><button onclick="showDetails('${doc.id}')">${doc.id}</button></td>`;
+                row.innerHTML = `<td><button onclick="showDetails('${doc.id}', '${year}')">${doc.id}</button></td>`;
                 tableBody.appendChild(row);
             });
         }
 
-        window.showDetails = async function(registrationNumber) {
-            const year = document.getElementById('yearSelect').value;
-            const studentDocRef = doc(db, `students/${year}/${registrationNumber}`);
+        window.showDetails = async function(registrationNumber, year) {
+            const studentDocRef = doc(db, `students/${year}/${registrationNumber}`); // Correct document reference
             const docSnap = await getDoc(studentDocRef);
             if (docSnap.exists()) {
                 const details = docSnap.data();
