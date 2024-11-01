@@ -5,21 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Student Details</title>
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
-        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "firebase/app";
+        import { getFirestore, doc, setDoc } from "firebase/firestore"; // Import Firestore functions
+        import { getAnalytics } from "firebase/analytics";
 
+        // Your web app's Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
             authDomain: "mamcet-ai.firebaseapp.com",
             projectId: "mamcet-ai",
-            storageBucket: "mamcet-ai.appspot.com",
+            storageBucket: "mamcet-ai.firebasestorage.app",
             messagingSenderId: "651882308996",
             appId: "1:651882308996:web:c19d4b0eb0591392cfe9d1",
             measurementId: "G-VQ12MPKH77"
         };
 
+        // Initialize Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app); // Initialize Firestore
 
         async function updateStudent(event) {
             event.preventDefault(); // Prevent the default form submission
@@ -33,6 +38,19 @@
             const gender = document.getElementById('gender').value.trim();
             const address = document.getElementById('address').value.trim();
             const phoneNumber = document.getElementById('phoneNumber').value.trim();
+
+            // Log the details being submitted
+            console.log('Submitting student details:', {
+                registrationNumber,
+                name,
+                dob,
+                bloodGroup,
+                department,
+                course,
+                gender,
+                address,
+                phoneNumber
+            });
 
             // Reference to the student document using the registration number
             const studentRef = doc(db, 'students', registrationNumber);
@@ -59,33 +77,37 @@
 </head>
 <body>
     <h1>Update Student Details</h1>
-    <form id="studentForm" onsubmit="updateStudent(event)">
+    <form id="updateStudentForm" onsubmit="updateStudent(event)">
         <label for="registrationNumber">Registration Number:</label>
-        <input type="text" id="registrationNumber" required><br>
+        <input type="text" id="registrationNumber" value="123456" required><br><br>
 
         <label for="name">Name:</label>
-        <input type="text" id="name" required><br>
+        <input type="text" id="name" value="John Doe" required><br><br>
 
         <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" required><br>
+        <input type="date" id="dob" value="2003-07-26" required><br><br>
 
         <label for="bloodGroup">Blood Group:</label>
-        <input type="text" id="bloodGroup" required><br>
+        <input type="text" id="bloodGroup" value="O+" required><br><br>
 
         <label for="department">Department:</label>
-        <input type="text" id="department" required><br>
+        <input type="text" id="department" value="Computer Science" required><br><br>
 
         <label for="course">Course:</label>
-        <input type="text" id="course" required><br>
+        <input type="text" id="course" value="B.Tech" required><br><br>
 
         <label for="gender">Gender:</label>
-        <input type="text" id="gender" required><br>
+        <select id="gender" required>
+            <option value="Male" selected>Male</option>
+            <option value="Female">Female</option>
+            <option value="Other">Other</option>
+        </select><br><br>
 
         <label for="address">Address:</label>
-        <input type="text" id="address" required><br>
+        <input type="text" id="address" value="123 Main St, Trichy" required><br><br>
 
         <label for="phoneNumber">Phone Number:</label>
-        <input type="text" id="phoneNumber" required><br>
+        <input type="text" id="phoneNumber" value="9876543210" required><br><br>
 
         <button type="submit">Update Student</button>
     </form>
