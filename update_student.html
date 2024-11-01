@@ -4,62 +4,63 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Student Details</title>
-    <script type="module">
-        // Import the functions you need from the SDKs you need
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
-        import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-app.js";
+    import { getFirestore, doc, updateDoc } from "https://www.gstatic.com/firebasejs/9.20.0/firebase-firestore.js";
 
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
-            authDomain: "mamcet-ai.firebaseapp.com",
-            projectId: "mamcet-ai",
-            storageBucket: "mamcet-ai.appspot.com",
-            messagingSenderId: "651882308996",
-            appId: "1:651882308996:web:c19d4b0eb0591392cfe9d1",
-            measurementId: "G-VQ12MPKH77"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
+        authDomain: "mamcet-ai.firebaseapp.com",
+        projectId: "mamcet-ai",
+        storageBucket: "mamcet-ai.appspot.com",
+        messagingSenderId: "651882308996",
+        appId: "1:651882308996:web:c19d4b0eb0591392cfe9d1",
+        measurementId: "G-VQ12MPKH77"
+    };
 
-        // Initialize Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-        // Function to update student details
-        async function updateStudent(event) {
-            event.preventDefault(); // Prevent the form from submitting in the default way
+    async function updateStudent(event) {
+        event.preventDefault(); // Prevent the default form submission
+        console.log('Form submission intercepted.'); // Log to verify interception
 
-            const registrationNumber = document.getElementById('registrationNumber').value;
-            const name = document.getElementById('name').value;
-            const dob = document.getElementById('dob').value;
-            const bloodGroup = document.getElementById('bloodGroup').value;
-            const department = document.getElementById('department').value;
-            const course = document.getElementById('course').value;
-            const gender = document.getElementById('gender').value;
-            const address = document.getElementById('address').value;
-            const phoneNumber = document.getElementById('phoneNumber').value;
+        const registrationNumber = document.getElementById('registrationNumber').value;
+        const name = document.getElementById('name').value;
+        const dob = document.getElementById('dob').value;
+        const bloodGroup = document.getElementById('bloodGroup').value;
+        const department = document.getElementById('department').value;
+        const course = document.getElementById('course').value;
+        const gender = document.getElementById('gender').value;
+        const address = document.getElementById('address').value;
+        const phoneNumber = document.getElementById('phoneNumber').value;
 
-            // Reference to the student document to be updated
-            const studentRef = doc(db, 'students', registrationNumber);
+        // Reference to the student document to be updated
+        const studentRef = doc(db, 'students', registrationNumber);
 
-            try {
-                // Update the student details in Firestore
-                await updateDoc(studentRef, {
-                    name: name,
-                    dob: dob,
-                    bloodGroup: bloodGroup,
-                    department: department,
-                    course: course,
-                    gender: gender,
-                    address: address,
-                    phoneNumber: phoneNumber
-                });
-                alert('Student details updated successfully!');
-            } catch (error) {
-                console.error('Error updating document: ', error);
-                alert('Failed to update student details. Please check the console for errors.');
-            }
+        try {
+            // Update the student details in Firestore
+            await updateDoc(studentRef, {
+                name: name,
+                dob: dob,
+                bloodGroup: bloodGroup,
+                department: department,
+                course: course,
+                gender: gender,
+                address: address,
+                phoneNumber: phoneNumber
+            });
+            alert('Student details updated successfully!');
+            console.log('Student details updated:', {
+                registrationNumber, name, dob, bloodGroup, department, course, gender, address, phoneNumber
+            }); // Log updated data
+        } catch (error) {
+            console.error('Error updating document: ', error);
+            alert('Failed to update student details. Please check the console for errors.');
         }
-    </script>
+    }
+</script>
+
 </head>
 <body>
     <h1>Update Student Details</h1>
