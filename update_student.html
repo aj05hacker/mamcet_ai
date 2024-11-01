@@ -4,7 +4,29 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Update Student</title>
-    <script>
+    <!-- Include Firebase SDKs -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+        import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-analytics.js";
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
+            authDomain: "mamcet-ai.firebaseapp.com",
+            projectId: "mamcet-ai",
+            storageBucket: "mamcet-ai.firebasestorage.app",
+            messagingSenderId: "651882308996",
+            appId: "1:651882308996:web:c19d4b0eb0591392cfe9d1",
+            measurementId: "G-VQ12MPKH77"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getFirestore(app);  // Initialize Firestore
+
         async function updateStudent() {
             const regNumber = document.getElementById('reg_number').value;
             const studentData = {
@@ -18,16 +40,12 @@
                 number: document.getElementById('number').value
             };
 
-            const response = await fetch(`/api/students/${regNumber}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(studentData)
-            });
-
-            const result = await response.json();
-            alert(result.message);
+            try {
+                await setDoc(doc(db, "students", regNumber), studentData, { merge: true });
+                alert('Student updated successfully');
+            } catch (error) {
+                alert('Error updating student: ' + error.message);
+            }
         }
     </script>
 </head>
