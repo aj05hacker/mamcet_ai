@@ -4,10 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>M.A.M CET - Students Update Page Admin Dashboard</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Ensure you have this file in the same directory -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        header {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+        }
+        h1 {
+            margin: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, select {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .student-table {
+            margin-top: 20px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .student-table th, .student-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .student-table th {
+            background-color: #007bff;
+            color: white;
+        }
+        .student-details {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>M.A.M CET - Students Update Page Admin Dashboard</h1>
+    </header>
+    <div class="container">
+        <form id="updateStudentForm">
+            <label for="registrationNumber">Registration Number:</label>
+            <input type="text" id="registrationNumber" required autocomplete="off">
+            
+            <label for="name">Name:</label>
+            <input type="text" id="name" required autocomplete="off">
+            
+            <label for="dob">Date of Birth:</label>
+            <input type="date" id="dob" required>
+            
+            <label for="bloodGroup">Blood Group:</label>
+            <select id="bloodGroup" required>
+                <option value="">Select Blood Group</option>
+                <option value="A+">A+</option>
+                <option value="A-">A-</option>
+                <option value="B+">B+</option>
+                <option value="B-">B-</option>
+                <option value="AB+">AB+</option>
+                <option value="AB-">AB-</option>
+                <option value="O+">O+</option>
+                <option value="O-">O-</option>
+            </select>
+            
+            <label for="department">Department:</label>
+            <input type="text" id="department" required autocomplete="off">
+            
+            <button type="submit">Update Student</button>
+        </form>
+
+        <h2>Registered Students</h2>
+        <table class="student-table" id="studentTable">
+            <thead>
+                <tr>
+                    <th>Registration Number</th>
+                    <th>Name</th>
+                </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+        </table>
+        
+        <div class="student-details" id="studentDetails"></div>
+    </div>
+
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-app.js";
-        import { getFirestore, collection, doc, setDoc, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.18.0/firebase-firestore.js";
+        import { initializeApp } from "firebase/app";
+        import { getFirestore, collection, addDoc, getDocs } from "firebase/firestore";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDPs_ETDj1ja8yVEOIPDzsQfqkfOFh9sKA",
@@ -22,158 +144,80 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        window.fetchStudents = async function() {
-            const year = document.getElementById('yearSelect').value; // Get the selected year
-            const studentsCollectionRef = collection(db, `students/${year}`); // Correct reference to year collection
-            const snapshot = await getDocs(studentsCollectionRef);
-            const tableBody = document.getElementById('studentTableBody');
-            tableBody.innerHTML = ""; // Clear previous data
+        document.getElementById('updateStudentForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
 
-            snapshot.forEach(doc => {
+            const registrationNumber = document.getElementById('registrationNumber').value;
+            const name = document.getElementById('name').value;
+            const dob = document.getElementById('dob').value;
+            const bloodGroup = document.getElementById('bloodGroup').value;
+            const department = document.getElementById('department').value;
+
+            const studentData = {
+                registrationNumber,
+                name,
+                dob,
+                bloodGroup,
+                department
+            };
+
+            try {
+                await addDoc(collection(db, 'students'), studentData);
+                alert('Student details updated successfully!');
+                loadStudents();
+                document.getElementById('updateStudentForm').reset();
+            } catch (error) {
+                console.error('Error updating student details: ', error);
+                alert('Failed to update student details.');
+            }
+        });
+
+        async function loadStudents() {
+            const studentTableBody = document.getElementById('studentTableBody');
+            studentTableBody.innerHTML = ''; // Clear existing data
+            const querySnapshot = await getDocs(collection(db, 'students'));
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
                 const row = document.createElement('tr');
-                row.innerHTML = `<td><button onclick="showDetails('${doc.id}', '${year}')">${doc.id}</button></td>`;
-                tableBody.appendChild(row);
+                row.innerHTML = `
+                    <td><a href="#" class="registration-link" data-id="${doc.id}">${data.registrationNumber}</a></td>
+                    <td>${data.name}</td>
+                `;
+                studentTableBody.appendChild(row);
             });
         }
 
-        window.showDetails = async function(registrationNumber, year) {
-            const studentDocRef = doc(db, `students/${year}/${registrationNumber}`); // Correct document reference
-            const docSnap = await getDoc(studentDocRef);
-            if (docSnap.exists()) {
-                const details = docSnap.data();
-                alert(JSON.stringify(details, null, 2)); // Show student details in an alert
+        document.getElementById('studentTableBody').addEventListener('click', (event) => {
+            if (event.target.classList.contains('registration-link')) {
+                event.preventDefault();
+                const studentId = event.target.getAttribute('data-id');
+                showStudentDetails(studentId);
+            }
+        });
+
+        async function showStudentDetails(id) {
+            const docRef = collection(db, 'students').doc(id);
+            const doc = await getDoc(docRef);
+
+            if (doc.exists()) {
+                const data = doc.data();
+                const detailsDiv = document.getElementById('studentDetails');
+                detailsDiv.innerHTML = `
+                    <h3>Student Details</h3>
+                    <p><strong>Registration Number:</strong> ${data.registrationNumber}</p>
+                    <p><strong>Name:</strong> ${data.name}</p>
+                    <p><strong>Date of Birth:</strong> ${data.dob}</p>
+                    <p><strong>Blood Group:</strong> ${data.bloodGroup}</p>
+                    <p><strong>Department:</strong> ${data.department}</p>
+                `;
+                detailsDiv.style.display = 'block';
             } else {
-                alert("No such student!");
+                alert('No such student found!');
             }
         }
 
-        window.updateStudent = async function(event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
-            const studentDetails = Object.fromEntries(formData.entries());
-            const year = studentDetails.year; // Get the year from the form
-
-            // Create a document with registration number as the document ID
-            const studentDocRef = doc(db, `students/${year}/${studentDetails.registrationNumber}`);
-            
-            try {
-                await setDoc(studentDocRef, studentDetails);
-                alert("Student details updated successfully!");
-                event.target.reset();
-                fetchStudents(); // Refresh the displayed student data
-            } catch (error) {
-                console.error("Error updating student details:", error);
-                alert("Failed to update student details. Please try again.");
-            }
-        }
+        loadStudents();
     </script>
-</head>
-<body>
-    <h1>M.A.M CET - Students Update Page Admin Dashboard</h1>
-    <form onsubmit="updateStudent(event)">
-        <label for="registrationNumber">Registration Number:</label>
-        <input type="text" id="registrationNumber" name="registrationNumber" required>
-        
-        <label for="name">Name:</label>
-        <input type="text" id="name" name="name" required>
-        
-        <label for="dob">Date of Birth:</label>
-        <input type="date" id="dob" name="dob" required>
-        
-        <label for="bloodGroup">Blood Group:</label>
-        <input type="text" id="bloodGroup" name="bloodGroup" required>
-        
-        <label for="department">Department:</label>
-        <input type="text" id="department" name="department" required>
-        
-        <label for="gender">Gender:</label>
-        <select id="gender" name="gender" required>
-            <option value="Male">Male</option>
-            <option value="Female">Female</option>
-            <option value="Other">Other</option>
-        </select>
-
-        <label for="year">Year:</label>
-        <select id="year" name="year" required>
-            <option value="1st year">1st Year</option>
-            <option value="2nd year">2nd Year</option>
-            <option value="3rd year">3rd Year</option>
-            <option value="4th year">4th Year</option>
-        </select>
-
-        <button type="submit">Update Student</button>
-    </form>
-
-    <h2>All Students in Selected Year</h2>
-    <select id="yearSelect" onchange="fetchStudents()">
-        <option value="1st year">1st Year</option>
-        <option value="2nd year">2nd Year</option>
-        <option value="3rd year">3rd Year</option>
-        <option value="4th year">4th Year</option>
-    </select>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>Registration Number</th>
-            </tr>
-        </thead>
-        <tbody id="studentTableBody">
-            <!-- Student data will be displayed here -->
-        </tbody>
-    </table>
-
-    <style>
-        /* Add some styles to make it look professional */
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        h1 {
-            text-align: center;
-        }
-        form {
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-        label {
-            display: block;
-            margin: 10px 0 5px;
-        }
-        input, select, button {
-            width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            padding: 10px;
-            text-align: left;
-            border: 1px solid #ccc;
-        }
-        th {
-            background-color: #f8f8f8;
-        }
-    </style>
 </body>
 </html>
