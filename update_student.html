@@ -27,7 +27,8 @@
         const analytics = getAnalytics(app);
         const db = getFirestore(app);  // Initialize Firestore
 
-        async function updateStudent() {
+        // Define the updateStudent function
+        window.updateStudent = async function() {
             const regNumber = document.getElementById('reg_number').value;
             const studentData = {
                 name: document.getElementById('name').value,
@@ -46,7 +47,7 @@
             } catch (error) {
                 alert('Error updating student: ' + error.message);
             }
-        }
+        };
     </script>
 </head>
 <body>
