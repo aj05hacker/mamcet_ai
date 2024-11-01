@@ -106,19 +106,19 @@
                 <option value="O+">O+</option>
                 <option value="O-">O-</option>
             </select>
-
+            
             <label for="degree">Degree:</label>
             <select id="degree" required>
                 <option value="">Select Degree</option>
-                <option value="B.E">B.E</option>
+                <option value="B.E.">B.E.</option>
                 <option value="B.Tech">B.Tech</option>
             </select>
-            
+
             <label for="course">Course:</label>
             <select id="course" required>
                 <option value="">Select Course</option>
                 <option value="IT">Information Technology</option>
-                <option value="CSE">Computer Science Engineering</option>
+                <option value="CSE">Computer Science and Engineering</option>
                 <option value="EEE">Electrical and Electronics Engineering</option>
                 <option value="ECE">Electronics and Communication Engineering</option>
                 <option value="MECH">Mechanical Engineering</option>
@@ -128,12 +128,12 @@
             <label for="year">Year:</label>
             <select id="year" required>
                 <option value="">Select Year</option>
-                <option value="1">1st Year</option>
-                <option value="2">2nd Year</option>
-                <option value="3">3rd Year</option>
-                <option value="4">4th Year</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
             </select>
-            
+
             <label for="gender">Gender:</label>
             <select id="gender" required>
                 <option value="">Select Gender</option>
@@ -141,26 +141,27 @@
                 <option value="Female">Female</option>
                 <option value="Other">Other</option>
             </select>
-            
+
             <label for="address">Address:</label>
             <input type="text" id="address" required autocomplete="off">
-            
+
             <label for="phoneNumber">Phone Number:</label>
             <input type="text" id="phoneNumber" required autocomplete="off">
-            
+
             <button type="submit">Update Student</button>
         </form>
 
-        <h2>Filter by Year:</h2>
-        <select id="yearFilter">
-            <option value="">All Years</option>
-            <option value="1">1st Year</option>
-            <option value="2">2nd Year</option>
-            <option value="3">3rd Year</option>
-            <option value="4">4th Year</option>
-        </select>
-
         <h2>Registered Students</h2>
+        <div>
+            <label for="yearFilter">Filter by Year:</label>
+            <select id="yearFilter">
+                <option value="">All Years</option>
+                <option value="1st Year">1st Year</option>
+                <option value="2nd Year">2nd Year</option>
+                <option value="3rd Year">3rd Year</option>
+                <option value="4th Year">4th Year</option>
+            </select>
+        </div>
         <table class="student-table" id="studentTable">
             <thead>
                 <tr>
@@ -233,12 +234,12 @@
 
         async function loadStudents() {
             const studentTableBody = document.getElementById('studentTableBody');
-            studentTableBody.innerHTML = ''; // Clear existing data
             const yearFilterValue = document.getElementById('yearFilter').value;
-            let studentsQuery = collection(db, 'students');
+            studentTableBody.innerHTML = ''; // Clear existing data
 
+            let studentsQuery = collection(db, 'students');
             if (yearFilterValue) {
-                studentsQuery = query(studentsQuery, where('year                ', '==', yearFilterValue);
+                studentsQuery = query(studentsQuery, where('year', '==', yearFilterValue));
             }
 
             const studentDocs = await getDocs(studentsQuery);
